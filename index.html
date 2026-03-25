@@ -2,175 +2,529 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUXESTATE | Элитная недвижимость</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JumpJump VPN - NextGen UI</title>
     <style>
-        body { font-family: 'Montserrat', sans-serif; scroll-behavior: smooth; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .hero-bg {
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
-                        url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
+        /* Базовые переменные и неоновая тема */
+        :root {
+            --bg-color: #090a0f;
+            --panel-bg: rgba(20, 22, 33, 0.6);
+            --accent-cyan: #00f3ff;
+            --accent-purple: #bc13fe;
+            --text-main: #ffffff;
+            --text-muted: #8b92a5;
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
-        .card-hover:hover { transform: translateY(-10px); transition: all 0.3s ease; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Убирает синее выделение при тапе на iOS */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(0, 243, 255, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(188, 19, 254, 0.05), transparent 25%);
+        }
+
+        /* Имитация экрана телефона */
+        .app-container {
+            width: 100%;
+            max-width: 430px; 
+            height: 100vh;
+            max-height: 932px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Эффект стекла (Glassmorphism) */
+        .glass {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+        }
+
+        /* Верхняя панель */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            z-index: 10;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 24px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .icon-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-style: italic;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+        }
+
+        /* Экраны приложения */
+        .view {
+            flex: 1;
+            padding: 0 20px;
+            display: none; /* Скрыты по умолчанию */
+            flex-direction: column;
+            overflow-y: auto;
+            padding-bottom: 40px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .view.active {
+            display: flex; /* Активный экран */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- ГЛАВНЫЙ ЭКРАН --- */
+        .connect-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+        .connect-btn {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #161824, #0d0e15);
+            border: 2px solid var(--glass-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow:
+                8px 8px 16px rgba(0,0,0,0.6),
+                -8px -8px 16px rgba(255,255,255,0.02),
+                inset 0 0 0px transparent;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        /* Свечение под кнопкой */
+        .connect-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple));
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            filter: blur(8px);
+        }
+
+        /* Состояние: Включено */
+        .connect-btn.connected {
+            box-shadow:
+                0 0 30px rgba(0, 243, 255, 0.4),
+                inset 0 0 20px rgba(0, 243, 255, 0.2);
+            border-color: var(--accent-cyan);
+        }
+
+        .connect-btn.connected::before {
+            opacity: 1;
+        }
+
+        .power-icon {
+            font-size: 50px;
+            color: var(--text-muted);
+            transition: color 0.4s ease, text-shadow 0.4s ease;
+        }
+
+        .connect-btn.connected .power-icon {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        /* VIP Баннер */
+        .premium-banner {
+            padding: 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.05));
+            border-color: rgba(255, 215, 0, 0.3);
+            position: relative;
+        }
+
+        .premium-title {
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .premium-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .premium-btn {
+            background: linear-gradient(90deg, #e6b980, #cda165);
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Выбор сервера на главной */
+        .server-selector {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .server-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .flag {
+            font-size: 24px;
+        }
+
+        /* --- ЭКРАН ВЫБОРА СЕРВЕРА --- */
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 14px;
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .tab.active {
+            background: var(--panel-bg);
+            color: var(--text-main);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .server-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .server-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .server-item:hover, .server-item:active {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+        }
+
+        .signal {
+            color: #00ff88;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* --- ЭКРАН НАСТРОЕК --- */
+        .settings-group {
+            margin-bottom: 24px;
+        }
+
+        .settings-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            margin-left: 8px;
+        }
+
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--glass-border);
+            cursor: pointer;
+        }
+        
+        .setting-item:first-child {
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+
+        .setting-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .setting-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body>
 
-    <nav class="fixed w-full z-50 glass border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold tracking-tighter text-blue-900">
-                LUXE<span class="text-amber-600">STATE</span>
-            </div>
-            <div class="hidden md:flex space-x-8 font-medium text-sm uppercase tracking-widest">
-                <a href="#home" class="hover:text-amber-600 transition">Главная</a>
-                <a href="#catalog" class="hover:text-amber-600 transition">Каталог</a>
-                <a href="#agents" class="hover:text-amber-600 transition">Агенты</a>
-                <a href="#contact" class="hover:text-amber-600 transition">Контакты</a>
-            </div>
-            <button class="bg-blue-900 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-amber-600 transition shadow-lg">
-                Личный кабинет
-            </button>
-        </div>
-    </nav>
+<div class="app-container">
+    
+    <header class="header">
+        <button class="icon-btn" onclick="openView('settings-view')">☰</button>
+        <div class="logo">JumpJump</div>
+        <button class="icon-btn">✉</button>
+    </header>
 
-    <section id="home" class="hero-bg h-screen flex items-center justify-center text-white px-6">
-        <div class="max-w-4xl text-center">
-            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">Найдите дом своей мечты</h1>
-            <p class="text-xl mb-10 opacity-90 font-light">Эксклюзивная недвижимость в самых престижных районах мира</p>
-            
-            <div class="bg-white p-2 rounded-xl md:rounded-full shadow-2xl flex flex-col md:flex-row gap-2">
-                <input type="text" placeholder="Город или район" class="flex-1 px-6 py-4 text-gray-700 focus:outline-none rounded-full">
-                <select class="px-6 py-4 text-gray-500 border-l border-gray-100 focus:outline-none bg-transparent">
-                    <option>Тип жилья</option>
-                    <option>Вилла</option>
-                    <option>Апартаменты</option>
-                </select>
-                <button class="bg-amber-600 hover:bg-amber-700 text-white px-10 py-4 rounded-full font-bold transition">
-                    Поиск
-                </button>
+    <main id="main-view" class="view active">
+        
+        <div class="connect-wrapper">
+            <div class="connect-btn" id="connectBtn" onclick="toggleConnection()">
+                <div class="power-icon">⏻</div>
             </div>
         </div>
-    </section>
 
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-                <div class="text-4xl font-bold text-blue-900">1200+</div>
-                <div class="text-gray-500 text-sm mt-2">Объектов продано</div>
+        <div class="premium-banner glass">
+            <div class="premium-title">Подписка за рубли</div>
+            <div class="premium-desc">
+                • Без рекламы и быстрое подключение<br>
+                • Больше узлов и высокая скорость<br>
+                • Стабильное соединение без разрывов
             </div>
-            <div>
-                <div class="text-4xl font-bold text-blue-900">450+</div>
-                <div class="text-gray-500 text-sm mt-2">Довольных клиентов</div>
-            </div>
-            <div>
-                <div class="text-4xl font-bold text-blue-900">15</div>
-                <div class="text-gray-500 text-sm mt-2">Лет на рынке</div>
-            </div>
-            <div>
-                <div class="text-4xl font-bold text-blue-900">24/7</div>
-                <div class="text-gray-500 text-sm mt-2">Поддержка</div>
-            </div>
-        </div>
-    </section>
-
-    <section id="catalog" class="py-24 px-6 max-w-7xl mx-auto">
-        <div class="flex justify-between items-end mb-16">
-            <div>
-                <h2 class="text-4xl font-bold text-blue-900 mb-4">Новые объекты</h2>
-                <div class="h-1 w-20 bg-amber-600"></div>
-            </div>
-            <a href="#" class="text-amber-600 font-semibold border-b-2 border-amber-600 pb-1">Смотреть все</a>
+            <button class="premium-btn">Купить сейчас ✈</button>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-10">
-            <div class="bg-white rounded-3xl overflow-hidden shadow-xl card-hover">
-                <div class="relative">
-                    <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80" alt="Villa" class="w-full h-64 object-cover">
-                    <div class="absolute top-4 left-4 bg-blue-900 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Продажа</div>
-                    <div class="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-lg font-bold text-blue-900 shadow-lg">$2,450,000</div>
-                </div>
-                <div class="p-8">
-                    <h3 class="text-xl font-bold mb-2">Ocean View Villa</h3>
-                    <p class="text-gray-500 text-sm mb-6 flex items-center"><i class="fa-solid fa-location-dot mr-2"></i> Майами, Флорида</p>
-                    <div class="flex justify-between border-t pt-6 text-gray-600 italic">
-                        <span><i class="fa-solid fa-bed text-amber-600 mr-2"></i> 5 Спален</span>
-                        <span><i class="fa-solid fa-bath text-amber-600 mr-2"></i> 4 Ванные</span>
+        <div class="server-selector glass" onclick="openView('servers-view')">
+            <div class="server-info">
+                <span class="flag">🖧</span>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Выбрать сервер</div>
+                    <div style="font-size: 16px; font-weight: 500;" id="current-server-name">
+                        <span class="flag">🇫🇷</span> Marseille 2#
                     </div>
                 </div>
             </div>
+            <div style="color: var(--text-muted);">❯</div>
+        </div>
+    </main>
 
-            <div class="bg-white rounded-3xl overflow-hidden shadow-xl card-hover">
-                <div class="relative">
-                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="House" class="w-full h-64 object-cover">
-                    <div class="absolute top-4 left-4 bg-amber-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Аренда</div>
-                    <div class="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-lg font-bold text-blue-900 shadow-lg">$12,000/мес</div>
+    <main id="servers-view" class="view">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <button class="icon-btn" onclick="openView('main-view')" style="margin-left: -10px;">✕</button>
+            <h1 class="page-title" style="margin: 0;">Выбрать сервер</h1>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active">Все</div>
+            <div class="tab">Избранное</div>
+            <div class="tab">Недавние</div>
+        </div>
+
+        <div class="server-list">
+            <div class="server-item glass" onclick="selectServer('🇫🇷 Marseille 2#')">
+                <div class="server-info">
+                    <span class="flag">🇫🇷</span><span>Франция</span>
                 </div>
-                <div class="p-8">
-                    <h3 class="text-xl font-bold mb-2">Modern Forest Edge</h3>
-                    <p class="text-gray-500 text-sm mb-6 flex items-center"><i class="fa-solid fa-location-dot mr-2"></i> Аспен, Колорадо</p>
-                    <div class="flex justify-between border-t pt-6 text-gray-600 italic">
-                        <span><i class="fa-solid fa-bed text-amber-600 mr-2"></i> 4 Спальни</span>
-                        <span><i class="fa-solid fa-bath text-amber-600 mr-2"></i> 3 Ванные</span>
-                    </div>
-                </div>
+                <div class="signal">📶 12ms</div>
             </div>
-
-            <div class="bg-white rounded-3xl overflow-hidden shadow-xl card-hover">
-                <div class="relative">
-                    <img src="https://images.unsplash.com/photo-1600607687940-47a0f925901e?auto=format&fit=crop&w=800&q=80" alt="Penthouse" class="w-full h-64 object-cover">
-                    <div class="absolute top-4 left-4 bg-blue-900 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Продажа</div>
-                    <div class="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-lg font-bold text-blue-900 shadow-lg">$890,000</div>
+            <div class="server-item glass" onclick="selectServer('🇩🇪 Германия')">
+                <div class="server-info">
+                    <span class="flag">🇩🇪</span><span>Германия</span>
                 </div>
-                <div class="p-8">
-                    <h3 class="text-xl font-bold mb-2">Skyline Penthouse</h3>
-                    <p class="text-gray-500 text-sm mb-6 flex items-center"><i class="fa-solid fa-location-dot mr-2"></i> Нью-Йорк, Манхэттен</p>
-                    <div class="flex justify-between border-t pt-6 text-gray-600 italic">
-                        <span><i class="fa-solid fa-bed text-amber-600 mr-2"></i> 2 Спальни</span>
-                        <span><i class="fa-solid fa-bath text-amber-600 mr-2"></i> 2 Ванные</span>
-                    </div>
+                <div class="signal">📶 18ms</div>
+            </div>
+            <div class="server-item glass" onclick="selectServer('🇳🇱 Нидерланды')">
+                <div class="server-info">
+                    <span class="flag">🇳🇱</span><span>Нидерланды</span>
+                </div>
+                <div class="signal">📶 21ms</div>
+            </div>
+            <div class="server-item glass" onclick="selectServer('🇬🇧 Великобритания')">
+                <div class="server-info">
+                    <span class="flag">🇬🇧</span><span>Великобритания</span>
+                </div>
+                <div class="signal">📶 25ms</div>
+            </div>
+            <div class="server-item glass" onclick="selectServer('🇨🇦 Канада')">
+                <div class="server-info">
+                    <span class="flag">🇨🇦</span><span>Канада</span>
+                </div>
+                <div class="signal">📶 85ms</div>
+            </div>
+        </div>
+    </main>
+
+    <main id="settings-view" class="view">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <button class="icon-btn" onclick="openView('main-view')" style="margin-left: -10px;">✕</button>
+            <h1 class="page-title" style="margin: 0;">Настройки</h1>
+        </div>
+
+        <div class="settings-group">
+            <div class="settings-title">Аккаунт</div>
+            <div class="settings-list">
+                <div class="setting-item glass">
+                    <div class="setting-left"><span>✉</span> Эл. почта</div>
+                    <div class="setting-right">Вход ❯</div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <section id="contact" class="bg-blue-900 py-24 text-white">
-        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-20 items-center">
-            <div>
-                <h2 class="text-4xl font-bold mb-6">Готовы найти свой новый дом?</h2>
-                <p class="text-blue-200 text-lg mb-10 leading-relaxed">Наши эксперты помогут вам на каждом этапе — от подбора идеального варианта до юридического сопровождения сделки.</p>
-                <div class="space-y-6">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-phone"></i></div>
-                        <div>+7 (999) 000-00-00</div>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-envelope"></i></div>
-                        <div>info@luxestate.com</div>
+        <div class="settings-group">
+            <div class="settings-title">Сеть</div>
+            <div class="settings-list">
+                <div class="setting-item glass">
+                    <div class="setting-left"><span>🖧</span> Режим маршрутизации</div>
+                    <div class="setting-right" style="text-align: right; line-height: 1.2;">
+                        Глобальная<br>маршрутизация ❯
                     </div>
                 </div>
-            </div>
-            <div class="bg-white p-10 rounded-3xl text-gray-900 shadow-2xl">
-                <form class="space-y-4">
-                    <input type="text" placeholder="Ваше имя" class="w-full p-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-600 outline-none transition">
-                    <input type="email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-600 outline-none transition">
-                    <textarea placeholder="Ваше сообщение" rows="4" class="w-full p-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-amber-600 outline-none transition"></textarea>
-                    <button class="w-full bg-blue-900 text-white font-bold py-4 rounded-xl hover:bg-amber-600 transition">Отправить запрос</button>
-                </form>
+                <div class="setting-item glass">
+                    <div class="setting-left"><span>↺</span> Восстановить по умолчанию</div>
+                </div>
             </div>
         </div>
-    </section>
 
-    <footer class="py-12 border-t border-gray-100 bg-white">
-        <div class="max-w-7xl mx-auto px-6 text-center text-gray-500 text-sm">
-            <div class="text-2xl font-bold text-blue-900 mb-6">LUXE<span class="text-amber-600">STATE</span></div>
-            <p>&copy; 2026 LUXESTATE. Все права защищены. Дизайн для профессионалов.</p>
+        <div class="settings-group">
+            <div class="settings-title">Приложение</div>
+            <div class="settings-list">
+                <div class="setting-item glass">
+                    <div class="setting-left"><span>🌐</span> Языки</div>
+                    <div class="setting-right">русский (ru) ❯</div>
+                </div>
+                <div class="setting-item glass">
+                    <div class="setting-left"><span>💬</span> Связаться с нами</div>
+                    <div class="setting-right">❯</div>
+                </div>
+                <div class="setting-item glass">
+                    <div class="setting-left"><span>❓</span> Часто задаваемые вопросы</div>
+                    <div class="setting-right">❯</div>
+                </div>
+                <div class="setting-item glass">
+                    <div class="setting-left"><span>ℹ</span> Версия</div>
+                    <div class="setting-right">V2.7.9</div>
+                </div>
+            </div>
         </div>
-    </footer>
+    </main>
+
+</div>
+
+<script>
+    // Функция переключения между разделами
+    function openView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+    }
+
+    // Анимация кнопки и Haptic Feedback (вибрация на телефоне)
+    function toggleConnection() {
+        const btn = document.getElementById('connectBtn');
+        btn.classList.toggle('connected');
+        
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(50); // Легкая вибрация
+        }
+    }
+
+    // Имитация выбора сервера
+    function selectServer(serverName) {
+        openView('main-view');
+        // Обновляем текст на главном экране (опционально)
+        document.getElementById('current-server-name').innerHTML = serverName;
+        
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(20);
+        }
+    }
+</script>
 
 </body>
 </html>
