@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Backrooms: Brainrot Survival</title>
+    <title>Backrooms: Brainrot Осада 2.0</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Courier New', Courier, monospace; touch-action: none; }
         #game-canvas { width: 100vw; height: 100vh; display: block; }
@@ -11,26 +11,28 @@
         /* Интерфейс */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; flex-direction: column; }
         #top-bar { padding: 10px; display: flex; justify-content: space-between; color: white; text-shadow: 2px 2px 0 #000; }
-        #brainrot-container { width: 50%; border: 2px solid #fff; height: 20px; background: rgba(0,0,0,0.5); }
-        #brainrot-bar { width: 0%; height: 100%; background: red; transition: width 0.2s; }
-        
-        /* Эффекты безумия */
-        #brainrot-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; mix-blend-mode: overlay; opacity: 0; transition: opacity 0.5s, backdrop-filter 0.5s; }
-        .meme-text { position: absolute; color: lime; font-weight: bold; font-size: 24px; text-shadow: 2px 2px red, -2px -2px blue; opacity: 0; animation: flash 0.5s infinite; }
-        
-        @keyframes flash { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0; transform: scale(1.5); } 100% { opacity: 1; transform: scale(1); } }
+        #brainrot-container { width: 40%; border: 2px solid #fff; height: 15px; background: rgba(0,0,0,0.5); }
+        #brainrot-bar { width: 0%; height: 100%; background: lime; transition: width 0.1s, background-color 0.1s; }
+        #anomalies-counter { color: yellow; font-size: 18px; margin-top: 5px; }
 
+        /* Эффекты безумия */
+        #brainrot-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; mix-blend-mode: overlay; opacity: 0; transition: opacity 0.3s, backdrop-filter 0.3s; }
+        .meme-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 300px; z-index: 100; pointer-events: none; }
+        
         /* Экраны */
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; pointer-events: auto; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; pointer-events: auto; text-align: center;}
         .hidden { display: none !important; }
         button { padding: 15px 30px; font-size: 20px; font-family: inherit; font-weight: bold; background: yellow; color: black; border: 4px solid #fff; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
         button:hover { background: red; color: white; }
         
-        /* Джойстик для мобилок */
-        #joystick-zone { position: absolute; bottom: 20px; left: 20px; width: 100px; height: 100px; background: rgba(255,255,255,0.2); border-radius: 50%; pointer-events: auto; z-index: 15; display: none; }
-        #joystick-knob { width: 40px; height: 40px; background: rgba(255,255,255,0.8); border-radius: 50%; position: absolute; top: 30px; left: 30px; }
+        /* Виртуальный джойстик (гарантированно виден) */
+        #joystick-zone { position: absolute; bottom: 30px; left: 30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: auto; z-index: 15; display: none; }
+        #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.7); border-radius: 50%; position: absolute; top: 35px; left: 35px; }
 
-        #yandex-ad-stub { position: absolute; bottom: 10px; width: 100%; text-align: center; color: rgba(255,255,255,0.5); font-size: 12px; pointer-events: none; z-index: 30;}
+        #yandex-ad-stub { position: absolute; bottom: 10px; width: 100%; text-align: center; color: rgba(255,255,255,0.3); font-size: 10px; pointer-events: none; z-index: 30;}
+        
+        @keyframes flashing { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        .flashing { animation: flashing 0.5s infinite; }
     </style>
 </head>
 <body>
@@ -39,9 +41,9 @@
 
     <div id="ui-layer">
         <div id="top-bar">
-            <div>УРОВЕНЬ БЕЗУМИЯ:</div>
+            <div>BRAINROT <span id="anomalies-total" style="color:yellow;">(0/5)</span>:</div>
             <div id="brainrot-container"><div id="brainrot-bar"></div></div>
-            <div id="timer">00:00</div>
+            <div id="timer">0 сек</div>
         </div>
         <div id="brainrot-overlay"></div>
     </div>
@@ -49,19 +51,19 @@
     <div id="joystick-zone"><div id="joystick-knob"></div></div>
 
     <div id="start-screen" class="screen">
-        <h1 style="color: yellow; font-size: 40px; text-align: center; text-shadow: 4px 4px red;">БЭКРУМС:<br>СКИБИДИ ОСАДА</h1>
-        <p>Найди зеленую дверь. Избегай нормисов. Береги рассудок.</p>
+        <h1 style="color: yellow; font-size: 45px; text-shadow: 4px 4px red;">БЭКРУМС:<br>SKIBIDI ОСАДА 2.0</h1>
+        <p>Найди **5 аномалий** (зеленые кристаллы), чтобы открыть выход.<br>Убегай от Скибиди-туалетов.<br>С рассудком <span class="flashing">все сложно</span>.</p>
         <p>WASD + Мышь (или джойстик на мобильном)</p>
-        <button id="btn-start">ВОЙТИ В BACKROOMS</button>
+        <button id="btn-start">СЛОМАТЬ МОЗГ (НАЧАТЬ)</button>
     </div>
 
     <div id="game-over-screen" class="screen hidden">
-        <h1 style="color: red; font-size: 50px;">ТЫ СГНИЛ МОЗГОМ</h1>
+        <h1 style="color: red; font-size: 60px; font-weight: bold; text-shadow: 4px 4px black;">ТЫ СГНИЛ МОЗГОМ</h1>
         <button id="btn-restart-dead">СМОТРЕТЬ РЕКЛАМУ И ВОСКРЕСНУТЬ</button>
     </div>
 
     <div id="win-screen" class="screen hidden">
-        <h1 style="color: lime; font-size: 50px; animation: flash 1s infinite;">СИГМА ВЫЖИВШИЙ</h1>
+        <h1 style="color: lime; font-size: 60px; font-weight: bold; text-shadow: 4px 4px black;" class="flashing">СИГМА ВЫЖИВШИЙ</h1>
         <button id="btn-restart-win">ЗАЛУТАТЬ РЕКЛАМУ И ЗАНОВО</button>
     </div>
 
@@ -74,15 +76,20 @@
         let brainrotLevel = 0; // от 0 до 100
         let gameTime = 0;
         let levelTimer = 0;
+        let anomaliesFound = 0;
+        let totalAnomalies = 5;
         let entities = [];
+        let anomalies = [];
         let walls = [];
-        let audioCtx;
-        let humOscillator;
+        let audioCtx, humOscillator, music;
 
-        // Настройки генерации
+        // Настройки
         const MAZE_SIZE = 10;
         const CELL_SIZE = 10;
         const WALL_HEIGHT = 4;
+        const PLAYER_SPEED = 40.0;
+        const BRAINROT_GROWTH_RATE = 0.3; // Ускоренный рост
+        const ENTITY_SPAWN_INTERVAL = 10; // Быстрее спавн
 
         // Управление
         const keys = { w: false, a: false, s: false, d: false };
@@ -91,6 +98,7 @@
         let direction = new THREE.Vector3();
         let euler = new THREE.Euler(0, 0, 0, 'YXZ');
         let isPointerLocked = false;
+        let isMobileControlsActive = false;
         
         // Мобильное управление
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -100,409 +108,204 @@
         // --- ПРОЦЕДУРНЫЕ ТЕКСТУРЫ ---
         function createWallpaperTexture() {
             const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 256;
+            canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#c7b275'; // Желтый цвет бэкрумса
-            ctx.fillRect(0, 0, 256, 256);
-            ctx.fillStyle = '#a69050';
-            for(let i=0; i<1000; i++) {
-                ctx.fillRect(Math.random()*256, Math.random()*256, 2, 2); // Шум
-            }
+            ctx.fillStyle = '#c7b275'; 
+            ctx.fillRect(0, 0, 512, 512);
+            // Шум
+            for(let i=0; i<3000; i++) { ctx.fillStyle = `rgba(166,144,80, ${Math.random()*0.3})`; ctx.fillRect(Math.random()*512, Math.random()*512, 2, 2); }
             // Полоски обоев
-            ctx.strokeStyle = '#b8a366';
-            ctx.lineWidth = 2;
-            for(let i=0; i<256; i+=32) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke(); }
+            ctx.strokeStyle = '#b8a366'; ctx.lineWidth = 1;
+            for(let i=0; i<512; i+=32) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke(); }
+            // Добавляем процедурные надписи прямо на текстуру
+            ctx.fillStyle = '#000'; ctx.font = "bold 30px 'Courier New'"; ctx.fillText("GYAT", 100 + Math.random()*300, 100 + Math.random()*300); ctx.fillText("SIGMA", 10 + Math.random()*300, 400 + Math.random()*100); ctx.fillText("OHIO", 200 + Math.random()*200, 200 + Math.random()*200);
             return new THREE.CanvasTexture(canvas);
         }
 
         function createCarpetTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#5c5443'; // Грязный ковер
-            ctx.fillRect(0, 0, 256, 256);
-            for(let i=0; i<5000; i++) {
-                ctx.fillStyle = Math.random() > 0.5 ? '#4a4335' : '#6e6552';
-                ctx.fillRect(Math.random()*256, Math.random()*256, 1, 1);
-            }
+            const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#5c5443'; ctx.fillRect(0, 0, 256, 256);
+            for(let i=0; i<6000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#4a4335' : '#6e6552'; ctx.fillRect(Math.random()*256, Math.random()*256, 1, 1); }
             return new THREE.CanvasTexture(canvas);
         }
 
-        function createMemeFaceTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 128; canvas.height = 128;
-            const ctx = canvas.getContext('2d');
+        function createCeilingTexture() {
+            const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ccc'; ctx.fillRect(0, 0, 256, 256);
+            for(let i=0; i<200; i++) { ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(Math.random()*256, Math.random()*256, 2, 2); }
+            // Лампы
+            ctx.fillStyle = '#fffee6'; ctx.fillRect(64, 64, 128, 128); ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.strokeRect(64, 64, 128, 128);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createSkibidiFaceTexture() {
+            const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128; const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(64, 64, 60, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#000'; ctx.font = "30px Arial"; ctx.fillText("SKIBIDI", 10, 70);
+            ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(45, 50, 8, 0, Math.PI*2); ctx.arc(83, 50, 8, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(64, 80, 20, 0, Math.PI); ctx.stroke();
+            ctx.fillStyle = '#000'; ctx.font = "bold 20px Arial"; ctx.fillText("SKIBIDI", 20, 70);
             return new THREE.CanvasTexture(canvas);
         }
 
         // --- ИНИЦИАЛИЗАЦИЯ THREE.JS ---
         function init3D() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x111111);
-            scene.fog = new THREE.Fog(0xc7b275, 5, 30); // Желтый туман
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x111111); scene.fog = new THREE.Fog(0xc7b275, 5, 25); // Желтый туман
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100); camera.position.y = 1.6;
+            renderer = new THREE.WebGLRenderer({ antialias: false }); renderer.setSize(window.innerWidth, window.innerHeight); document.body.appendChild(renderer.domElement);
 
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.y = 1.6;
-
-            renderer = new THREE.WebGLRenderer({ antialias: false });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-
-            // Освещение (мерцающие лампы)
-            const ambientLight = new THREE.AmbientLight(0xfff0c2, 0.4);
-            scene.add(ambientLight);
+            const ambientLight = new THREE.AmbientLight(0xfff0c2, 0.4); scene.add(ambientLight);
             
-            const pointLight = new THREE.PointLight(0xffffff, 0.8, 50);
-            pointLight.position.set(0, 3.5, 0);
-            scene.add(pointLight);
-
-            generateMaze();
-
-            window.addEventListener('resize', onWindowResize, false);
-            setupControls();
-            
-            // На мобилках показываем джойстик
-            if(isMobile) {
-                document.getElementById('joystick-zone').style.display = 'block';
-                setupMobileControls();
-            }
+            generateMaze(); window.addEventListener('resize', onWindowResize, false);
+            if(isMobile) { document.getElementById('joystick-zone').style.display = 'block'; setupMobileControls(); } else { setupControls(); }
         }
 
         // --- ГЕНЕРАЦИЯ ЛАБИРИНТА ---
         function generateMaze() {
             const wallMat = new THREE.MeshBasicMaterial({ map: createWallpaperTexture() });
             const floorMat = new THREE.MeshBasicMaterial({ map: createCarpetTexture() });
-            const ceilMat = new THREE.MeshBasicMaterial({ color: 0xdddddd });
+            const ceilMat = new THREE.MeshBasicMaterial({ map: createCeilingTexture() });
 
             // Пол и потолок
             const floorGeo = new THREE.PlaneGeometry(MAZE_SIZE * CELL_SIZE, MAZE_SIZE * CELL_SIZE);
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = -Math.PI / 2;
-            floor.position.set((MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2, 0, (MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2);
-            scene.add(floor);
-
-            const ceil = new THREE.Mesh(floorGeo, ceilMat);
-            ceil.rotation.x = Math.PI / 2;
-            ceil.position.set((MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2, WALL_HEIGHT, (MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2);
-            scene.add(ceil);
+            const floor = new THREE.Mesh(floorGeo, floorMat); floor.rotation.x = -Math.PI / 2; floor.position.set((MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2, 0, (MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2); scene.add(floor);
+            const ceil = new THREE.Mesh(floorGeo, ceilMat); ceil.rotation.x = Math.PI / 2; ceil.position.set((MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2, WALL_HEIGHT, (MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2); scene.add(ceil);
 
             const wallGeo = new THREE.BoxGeometry(CELL_SIZE, WALL_HEIGHT, CELL_SIZE);
 
-            // Простой алгоритм: рандомные блоки (для примера упрощено)
+            // Гарантированно замкнутый лабиринт
             for (let x = 0; x < MAZE_SIZE; x++) {
                 for (let z = 0; z < MAZE_SIZE; z++) {
-                    if (x === 0 || z === 0 || x === MAZE_SIZE-1 || z === MAZE_SIZE-1 || Math.random() > 0.7) {
-                        // Оставляем спавн пустым
-                        if(x<2 && z<2) continue; 
-                        const wall = new THREE.Mesh(wallGeo, wallMat);
-                        wall.position.set(x * CELL_SIZE, WALL_HEIGHT/2, z * CELL_SIZE);
-                        scene.add(wall);
-                        walls.push(new THREE.Box3().setFromObject(wall));
+                    // Оставляем спавн, центр и коридор к выходу пустыми
+                    if((x<3 && z<3) || (x === MAZE_SIZE-2 && z === MAZE_SIZE-2)) continue; 
+                    if (x === 0 || z === 0 || x === MAZE_SIZE-1 || z === MAZE_SIZE-1 || Math.random() > 0.6) {
+                        const wall = new THREE.Mesh(wallGeo, wallMat); wall.position.set(x * CELL_SIZE, WALL_HEIGHT/2, z * CELL_SIZE); scene.add(wall); walls.push(new THREE.Box3().setFromObject(wall));
                     }
                 }
             }
 
-            // Выход (Зеленая дверь)
-            const exitGeo = new THREE.BoxGeometry(2, 3, 0.5);
-            const exitMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            const exit = new THREE.Mesh(exitGeo, exitMat);
-            exit.position.set((MAZE_SIZE-2)*CELL_SIZE, 1.5, (MAZE_SIZE-2)*CELL_SIZE);
-            exit.name = "exit";
-            scene.add(exit);
-            walls.push(new THREE.Box3().setFromObject(exit)); // Добавляем как коллизию для проверки
+            // Выход (Появляется в конце)
+            const exitGeo = new THREE.BoxGeometry(2, 3, 0.5); const exitMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); const exit = new THREE.Mesh(exitGeo, exitMat); exit.position.set((MAZE_SIZE-2)*CELL_SIZE, 1.5, (MAZE_SIZE-2)*CELL_SIZE); exit.name = "exit_final"; scene.add(exit); exit.visible = false;
+
+            // Аномалии
+            for(let i=0; i<totalAnomalies; i++) {
+                const cryGeo = new THREE.IcosahedronGeometry(0.5, 0); const cryMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); const cry = new THREE.Mesh(cryGeo, cryMat);
+                // Спавним в рандомных свободных клетках (упрощено)
+                cry.position.set(20 + Math.random()*70, 0.5, 20 + Math.random()*70); cry.name = "anomaly"; scene.add(cry); anomalies.push(cry);
+            }
         }
 
         // --- УПРАВЛЕНИЕ ---
         function setupControls() {
-            if (!isMobile) {
-                document.addEventListener('click', () => { if(isGameRunning) document.body.requestPointerLock(); });
-                document.addEventListener('pointerlockchange', () => { isPointerLocked = document.pointerLockElement === document.body; });
-                document.addEventListener('mousemove', (e) => {
-                    if (isPointerLocked && isGameRunning) {
-                        euler.setFromQuaternion(camera.quaternion);
-                        euler.y -= e.movementX * 0.002;
-                        euler.x -= e.movementY * 0.002;
-                        euler.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, euler.x));
-                        camera.quaternion.setFromEuler(euler);
-                    }
-                });
-
-                document.addEventListener('keydown', (e) => {
-                    switch(e.code) {
-                        case 'KeyW': moveForward = true; break;
-                        case 'KeyA': moveLeft = true; break;
-                        case 'KeyS': moveBackward = true; break;
-                        case 'KeyD': moveRight = true; break;
-                    }
-                });
-                document.addEventListener('keyup', (e) => {
-                    switch(e.code) {
-                        case 'KeyW': moveForward = false; break;
-                        case 'KeyA': moveLeft = false; break;
-                        case 'KeyS': moveBackward = false; break;
-                        case 'KeyD': moveRight = false; break;
-                    }
-                });
-            }
+            document.addEventListener('click', () => { if(isGameRunning) document.body.requestPointerLock(); });
+            document.addEventListener('pointerlockchange', () => { isPointerLocked = document.pointerLockElement === document.body; });
+            document.addEventListener('mousemove', (e) => { if (isPointerLocked && isGameRunning) { euler.setFromQuaternion(camera.quaternion); euler.y -= e.movementX * 0.002; euler.x -= e.movementY * 0.002; euler.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, euler.x)); camera.quaternion.setFromEuler(euler); } });
+            document.addEventListener('keydown', (e) => { switch(e.code) { case 'KeyW': moveForward = true; break; case 'KeyA': moveLeft = true; break; case 'KeyS': moveBackward = true; break; case 'KeyD': moveRight = true; break; } });
+            document.addEventListener('keyup', (e) => { switch(e.code) { case 'KeyW': moveForward = false; break; case 'KeyA': moveLeft = false; break; case 'KeyS': moveBackward = false; break; case 'KeyD': moveRight = false; break; } });
         }
 
         function setupMobileControls() {
-            const zone = document.getElementById('joystick-zone');
-            const knob = document.getElementById('joystick-knob');
-            
-            zone.addEventListener('touchstart', (e) => {
-                touchStartPos.x = e.touches[0].clientX;
-                touchStartPos.y = e.touches[0].clientY;
-            });
-            
-            zone.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                let dx = e.touches[0].clientX - touchStartPos.x;
-                let dy = e.touches[0].clientY - touchStartPos.y;
-                let distance = Math.sqrt(dx*dx + dy*dy);
-                if(distance > 30) { dx *= 30/distance; dy *= 30/distance; }
-                knob.style.transform = `translate(${dx}px, ${dy}px)`;
-                
-                touchMoveDir.x = dx / 30; // -1 to 1
-                touchMoveDir.y = dy / 30; // -1 to 1
-                
-                moveForward = touchMoveDir.y < -0.2;
-                moveBackward = touchMoveDir.y > 0.2;
-                moveLeft = touchMoveDir.x < -0.2;
-                moveRight = touchMoveDir.x > 0.2;
-            });
-
-            zone.addEventListener('touchend', () => {
-                knob.style.transform = `translate(0px, 0px)`;
-                moveForward = moveBackward = moveLeft = moveRight = false;
-            });
-
+            const zone = document.getElementById('joystick-zone'); const knob = document.getElementById('joystick-knob');
+            zone.addEventListener('touchstart', (e) => { isMobileControlsActive = true; touchStartPos.x = e.touches[0].clientX; touchStartPos.y = e.touches[0].clientY; });
+            zone.addEventListener('touchmove', (e) => { e.preventDefault(); let dx = e.touches[0].clientX - touchStartPos.x; let dy = e.touches[0].clientY - touchStartPos.y; let distance = Math.sqrt(dx*dx + dy*dy); if(distance > 30) { dx *= 30/distance; dy *= 30/distance; } knob.style.transform = `translate(${dx}px, ${dy}px)`; touchMoveDir.x = dx / 30; touchMoveDir.y = dy / 30; });
+            zone.addEventListener('touchend', () => { knob.style.transform = `translate(0px, 0px)`; moveForward = moveBackward = moveLeft = moveRight = false; touchMoveDir.x = touchMoveDir.y = 0; });
             // Поворот камеры свайпом по правой части экрана
-            document.addEventListener('touchmove', (e) => {
-                if(!isGameRunning) return;
-                let touch = e.touches[0];
-                if(touch.clientX > window.innerWidth / 2) {
-                     euler.setFromQuaternion(camera.quaternion);
-                     // Имитация movementX (очень упрощенно)
-                     euler.y -= (touch.clientX - (touch.clientX-1)) * 0.05; 
-                     camera.quaternion.setFromEuler(euler);
-                }
-            });
+            renderer.domElement.addEventListener('touchmove', (e) => { if(!isGameRunning || isMobileControlsActive) return; let touch = e.touches[0]; if(touch.clientX > window.innerWidth / 2) { euler.setFromQuaternion(camera.quaternion); euler.y -= 0.03 * (touch.clientX > window.innerWidth/2 ? 1:-1); camera.quaternion.setFromEuler(euler); } });
         }
 
-        // --- ЗВУК (ПРОЦЕДУРНЫЙ) ---
-        function initAudio() {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            humOscillator = audioCtx.createOscillator();
-            humOscillator.type = 'sine';
-            humOscillator.frequency.value = 50; // Гул ламп
-            
-            const gainNode = audioCtx.createGain();
-            gainNode.gain.value = 0.1;
-            
-            humOscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            humOscillator.start();
-        }
-
-        function playGlitchSound() {
-            if(!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(100 + Math.random()*500, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.5);
-            osc.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.5);
-        }
+        // --- ЗВУК ---
+        function initAudio() { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); humOscillator = audioCtx.createOscillator(); humOscillator.type = 'sine'; humOscillator.frequency.value = 50; const gainNode = audioCtx.createGain(); gainNode.gain.value = 0.1; humOscillator.connect(gainNode); gainNode.connect(audioCtx.destination); humOscillator.start(); }
+        function playGlitchSound() { if(!audioCtx) return; const osc = audioCtx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100 + Math.random()*500, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.3); osc.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.3); }
 
         // --- ЛОГИКА ИГРЫ ---
-        function spawnEntity() {
-            const geo = new THREE.SphereGeometry(1, 16, 16);
-            const mat = new THREE.MeshBasicMaterial({ map: createMemeFaceTexture(), transparent: true, opacity: 0.8 });
-            const mesh = new THREE.Mesh(geo, mat);
-            // Спавн подальше от старта
-            mesh.position.set(Math.random()*MAZE_SIZE*CELL_SIZE, 1, Math.random()*MAZE_SIZE*CELL_SIZE);
-            scene.add(mesh);
-            entities.push(mesh);
+        function spawnSkibidi() {
+            // Простая модель Скибиди Унитаза
+            const geo = new THREE.CylinderGeometry(1, 1, 2.5, 8); const mat = new THREE.MeshBasicMaterial({ color: 0xffffff }); const mesh = new THREE.Mesh(geo, mat); mesh.position.set(40 + Math.random()*50, 1.25, 40 + Math.random()*50);
+            // Лицо
+            const faceMat = new THREE.MeshBasicMaterial({ map: createSkibidiFaceTexture(), transparent: true }); const faceGeo = new THREE.SphereGeometry(0.6, 16, 16); const face = new THREE.Mesh(faceGeo, faceMat); face.position.y = 1.25; face.position.z = 0.8; mesh.add(face);
+            scene.add(mesh); entities.push(mesh);
         }
 
         function updateBrainrot() {
             if(!isGameRunning) return;
-            
-            // Со временем безумие растет
-            brainrotLevel += 0.05; 
+            brainrotLevel += BRAINROT_GROWTH_RATE; // Ускоренный рост
             document.getElementById('brainrot-bar').style.width = brainrotLevel + '%';
+            if(brainrotLevel > 50) document.getElementById('brainrot-bar').style.backgroundColor = 'red';
 
-            // Эффекты
             const overlay = document.getElementById('brainrot-overlay');
-            if (brainrotLevel > 20) {
-                overlay.style.opacity = (brainrotLevel - 20) / 100;
-                overlay.style.backdropFilter = `hue-rotate(${brainrotLevel*5}deg) blur(${brainrotLevel/20}px) contrast(${1 + brainrotLevel/50})`;
+            if (brainrotLevel > 15) {
+                overlay.style.opacity = (brainrotLevel - 15) / 90;
+                overlay.style.backdropFilter = `hue-rotate(${brainrotLevel*5}deg) blur(${brainrotLevel/20}px) contrast(${1 + brainrotLevel/100})`;
             }
-
-            if (Math.random() < brainrotLevel / 2000) {
-                spawnMemeText();
-                playGlitchSound();
-            }
-
-            if (brainrotLevel >= 100) {
-                endGame(false);
-            }
-        }
-
-        function spawnMemeText() {
-            const words = ["SKIBIDI", "GYAT", "OHIO", "SIGMA", "РИЗЗ"];
-            const div = document.createElement('div');
-            div.className = 'meme-text';
-            div.innerText = words[Math.floor(Math.random() * words.length)];
-            div.style.left = Math.random() * 80 + 'vw';
-            div.style.top = Math.random() * 80 + 'vh';
-            document.getElementById('ui-layer').appendChild(div);
-            setTimeout(() => div.remove(), 1000);
+            if (Math.random() < brainrotLevel / 300) playGlitchSound();
+            if (brainrotLevel >= 100) endGame(false);
         }
 
         function checkCollisions() {
             const playerBox = new THREE.Box3().setFromCenterAndSize(camera.position, new THREE.Vector3(1, 2, 1));
-            
-            // Стены и выход
-            for(let wall of walls) {
-                if(playerBox.intersectsBox(wall)) {
-                    // Коллизия с выходом
-                    if(wall.max.y < 3) { // Костыль для определения двери
-                        endGame(true);
-                        return true;
-                    }
-                    return true; // Коллизия со стеной
+            // Стены
+            for(let wall of walls) { if(playerBox.intersectsBox(wall)) return true; }
+            // Аномалии
+            for(let cry of anomalies) {
+                const cryBox = new THREE.Box3().setFromObject(cry);
+                if(playerBox.intersectsBox(cryBox)) {
+                    anomaliesFound++; cry.position.y = -10; playGlitchSound(); brainrotLevel += 10; updateUi();
+                    if(anomaliesFound >= totalAnomalies) { document.getElementById('win-screen').querySelector('h1').innerText = "ОТКРЫЛ ВЫХОД! БЕГИ!"; document.querySelector('[name=exit_final]').visible = true;}
                 }
             }
-            
+            // Выход (если открыт)
+            const exitFinal = scene.getObjectByName('exit_final');
+            if(exitFinal && exitFinal.visible && playerBox.intersectsBox(new THREE.Box3().setFromObject(exitFinal))) endGame(true);
             // Монстры
-            for(let ent of entities) {
-                const entBox = new THREE.Box3().setFromObject(ent);
-                if(playerBox.intersectsBox(entBox)) {
-                    brainrotLevel += 5; // Удар по рассудку
-                    playGlitchSound();
-                    ent.position.y = -100; // Прячем монстра
-                }
-            }
+            for(let ent of entities) { if(playerBox.intersectsBox(new THREE.Box3().setFromObject(ent))) { brainrotLevel += 15; playGlitchSound(); ent.position.y = -100; } }
             return false;
         }
 
-        // --- ИГРОВОЙ ЦИКЛ ---
+        function updateUi() { document.getElementById('anomalies-total').innerText = `(${anomaliesFound}/${totalAnomalies})`; }
+
         let prevTime = performance.now();
         function animate() {
             requestAnimationFrame(animate);
-
             if (isGameRunning) {
-                const time = performance.now();
-                const delta = (time - prevTime) / 1000;
-                
-                // Таймер
-                gameTime += delta;
-                document.getElementById('timer').innerText = Math.floor(gameTime) + ' сек';
-
-                // Спавн монстров каждые 15 сек
+                const time = performance.now(); const delta = (time - prevTime) / 1000;
+                gameTime += delta; document.getElementById('timer').innerText = Math.floor(gameTime) + ' сек';
                 levelTimer += delta;
-                if(levelTimer > 15) {
-                    spawnEntity();
-                    levelTimer = 0;
-                    playGlitchSound();
-                }
+                if(levelTimer > ENTITY_SPAWN_INTERVAL) { spawnSkibidi(); levelTimer = 0; playGlitchSound(); }
 
-                // Движение
-                velocity.x -= velocity.x * 10.0 * delta;
-                velocity.z -= velocity.z * 10.0 * delta;
-
-                direction.z = Number(moveForward) - Number(moveBackward);
-                direction.x = Number(moveRight) - Number(moveLeft);
+                velocity.x -= velocity.x * 10.0 * delta; velocity.z -= velocity.z * 10.0 * delta;
+                if(isMobile) { direction.z = Number(moveBackward) - Number(moveForward); direction.x = Number(moveRight) - Number(moveLeft); } else { direction.z = Number(moveForward) - Number(moveBackward); direction.x = Number(moveRight) - Number(moveLeft); }
                 direction.normalize();
 
-                // Чем больше безумие, тем медленнее идем
-                const speedMulti = Math.max(0.2, 1 - (brainrotLevel/150));
-                const currentSpeed = 40.0 * speedMulti;
+                const speed = PLAYER_SPEED * Math.max(0.1, 1 - (brainrotLevel/120));
+                if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
+                if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
 
-                if (moveForward || moveBackward) velocity.z -= direction.z * currentSpeed * delta;
-                if (moveLeft || moveRight) velocity.x -= direction.x * currentSpeed * delta;
-
-                // Сохраняем позицию до движения
-                const oldX = camera.position.x;
-                const oldZ = camera.position.z;
-
-                camera.translateX(velocity.x * delta);
-                camera.translateZ(velocity.z * delta);
-
-                if (checkCollisions()) {
-                    camera.position.x = oldX;
-                    camera.position.z = oldZ;
-                }
-
+                const oldPos = camera.position.clone();
+                camera.translateX(velocity.x * delta); camera.translateZ(velocity.z * delta);
+                if (checkCollisions()) camera.position.copy(oldPos);
                 updateBrainrot();
-                
-                // Анимация монстров (смотрят на игрока)
                 entities.forEach(ent => {
-                    ent.lookAt(camera.position);
-                    // Медленно ползут к игроку
-                    const dir = new THREE.Vector3().subVectors(camera.position, ent.position).normalize();
-                    ent.position.add(dir.multiplyScalar(0.02));
+                    ent.lookAt(camera.position); const dir = new THREE.Vector3().subVectors(camera.position, ent.position).normalize();
+                    const entSpeed = 0.05 + (brainrotLevel / 400); // Ускоряются от брэйнрота
+                    ent.position.add(dir.multiplyScalar(entSpeed));
                 });
-                
                 prevTime = time;
             }
-            
             renderer.render(scene, camera);
         }
 
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
+        function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
 
-        // --- УПРАВЛЕНИЕ СОСТОЯНИЕМ ИГРЫ ---
         function startGame() {
-            document.getElementById('start-screen').classList.add('hidden');
-            if(!audioCtx) initAudio();
-            if(!scene) {
-                init3D();
-                animate();
-            }
-            // Сброс параметров
-            camera.position.set(CELL_SIZE/2, 1.6, CELL_SIZE/2);
-            brainrotLevel = 0;
-            gameTime = 0;
-            levelTimer = 0;
-            entities.forEach(e => scene.remove(e));
-            entities = [];
-            isGameRunning = true;
-            prevTime = performance.now();
-            if(!isMobile) document.body.requestPointerLock();
+            document.getElementById('start-screen').classList.add('hidden'); if(!audioCtx) initAudio();
+            if(!scene) { init3D(); animate(); }
+            // Спавним первого Скибиди сразу
+            spawnSkibidi(); updateUi();
+            camera.position.set(CELL_SIZE/2, 1.6, CELL_SIZE/2); brainrotLevel = anomaliesFound = gameTime = levelTimer = 0;
+            isGameRunning = true; prevTime = performance.now();
+            document.querySelector('[name=exit_final]').visible = false;
         }
 
-        function endGame(isWin) {
-            isGameRunning = false;
-            if(!isMobile) document.exitPointerLock();
-            
-            if(isWin) {
-                document.getElementById('win-screen').classList.remove('hidden');
-            } else {
-                document.getElementById('game-over-screen').classList.remove('hidden');
-            }
-        }
+        function endGame(isWin) { isGameRunning = false; if(!isWin) document.body.requestPointerLock(); if(isWin) document.getElementById('win-screen').classList.remove('hidden'); else document.getElementById('game-over-screen').classList.remove('hidden'); }
+        function showYandexAdAndRestart(screenId) { alert("Имитация: Реклама просмотрена! Пополнен баланс Brainrot. Перезапуск..."); document.getElementById(screenId).classList.add('hidden'); startGame(); }
 
-        // --- ИНТЕГРАЦИЯ ЯНДЕКС SDK (Заглушка) ---
-        function showYandexAdAndRestart(screenId) {
-            // В РЕАЛЬНОМ ПРОЕКТЕ ЗДЕСЬ ВЫЗОВ SDK:
-            // ysdk.adv.showRewardedVideo({ callbacks: { onRewarded: () => { ... } } });
-            
-            alert("Имитация: Реклама просмотрена! Баланс пополнен (шутка). Перезапуск...");
-            document.getElementById(screenId).classList.add('hidden');
-            startGame();
-        }
-
-        // Привязка кнопок
         document.getElementById('btn-start').addEventListener('click', startGame);
         document.getElementById('btn-restart-dead').addEventListener('click', () => showYandexAdAndRestart('game-over-screen'));
         document.getElementById('btn-restart-win').addEventListener('click', () => showYandexAdAndRestart('win-screen'));
