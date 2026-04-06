@@ -2,529 +2,511 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JumpJump VPN - NextGen UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Backrooms: Brainrot Survival</title>
     <style>
-        /* Базовые переменные и неоновая тема */
-        :root {
-            --bg-color: #090a0f;
-            --panel-bg: rgba(20, 22, 33, 0.6);
-            --accent-cyan: #00f3ff;
-            --accent-purple: #bc13fe;
-            --text-main: #ffffff;
-            --text-muted: #8b92a5;
-            --glass-border: rgba(255, 255, 255, 0.08);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent; /* Убирает синее выделение при тапе на iOS */
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-            background-image:
-                radial-gradient(circle at 15% 50%, rgba(0, 243, 255, 0.05), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(188, 19, 254, 0.05), transparent 25%);
-        }
-
-        /* Имитация экрана телефона */
-        .app-container {
-            width: 100%;
-            max-width: 430px; 
-            height: 100vh;
-            max-height: 932px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* Эффект стекла (Glassmorphism) */
-        .glass {
-            background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-        }
-
-        /* Верхняя панель */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            z-index: 10;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 24px;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-
-        .icon-btn:active {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: 800;
-            font-style: italic;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
-        }
-
-        /* Экраны приложения */
-        .view {
-            flex: 1;
-            padding: 0 20px;
-            display: none; /* Скрыты по умолчанию */
-            flex-direction: column;
-            overflow-y: auto;
-            padding-bottom: 40px;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .view.active {
-            display: flex; /* Активный экран */
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- ГЛАВНЫЙ ЭКРАН --- */
-        .connect-wrapper {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 300px;
-        }
-
-        .connect-btn {
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #161824, #0d0e15);
-            border: 2px solid var(--glass-border);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow:
-                8px 8px 16px rgba(0,0,0,0.6),
-                -8px -8px 16px rgba(255,255,255,0.02),
-                inset 0 0 0px transparent;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-        }
-
-        /* Свечение под кнопкой */
-        .connect-btn::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple));
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            filter: blur(8px);
-        }
-
-        /* Состояние: Включено */
-        .connect-btn.connected {
-            box-shadow:
-                0 0 30px rgba(0, 243, 255, 0.4),
-                inset 0 0 20px rgba(0, 243, 255, 0.2);
-            border-color: var(--accent-cyan);
-        }
-
-        .connect-btn.connected::before {
-            opacity: 1;
-        }
-
-        .power-icon {
-            font-size: 50px;
-            color: var(--text-muted);
-            transition: color 0.4s ease, text-shadow 0.4s ease;
-        }
-
-        .connect-btn.connected .power-icon {
-            color: var(--accent-cyan);
-            text-shadow: 0 0 15px var(--accent-cyan);
-        }
-
-        /* VIP Баннер */
-        .premium-banner {
-            padding: 20px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.05));
-            border-color: rgba(255, 215, 0, 0.3);
-            position: relative;
-        }
-
-        .premium-title {
-            color: #ffd700;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-        }
-
-        .premium-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-            line-height: 1.4;
-        }
-
-        .premium-btn {
-            background: linear-gradient(90deg, #e6b980, #cda165);
-            color: #1a1a1a;
-            border: none;
-            padding: 12px 0;
-            width: 100%;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        /* Выбор сервера на главной */
-        .server-selector {
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-
-        .server-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .flag {
-            font-size: 24px;
-        }
-
-        /* --- ЭКРАН ВЫБОРА СЕРВЕРА --- */
-        .page-title {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .tabs {
-            display: flex;
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 10px 0;
-            font-size: 14px;
-            color: var(--text-muted);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .tab.active {
-            background: var(--panel-bg);
-            color: var(--text-main);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .server-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .server-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-
-        .server-item:hover, .server-item:active {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
-        }
-
-        .signal {
-            color: #00ff88;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* --- ЭКРАН НАСТРОЕК --- */
-        .settings-group {
-            margin-bottom: 24px;
-        }
-
-        .settings-title {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            margin-left: 8px;
-        }
-
-        .settings-list {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            overflow: hidden;
-        }
-
-        .setting-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
-            background: var(--panel-bg);
-            border-bottom: 1px solid var(--glass-border);
-            cursor: pointer;
-        }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Courier New', Courier, monospace; touch-action: none; }
+        #game-canvas { width: 100vw; height: 100vh; display: block; }
         
-        .setting-item:first-child {
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-        }
+        /* Интерфейс */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; flex-direction: column; }
+        #top-bar { padding: 10px; display: flex; justify-content: space-between; color: white; text-shadow: 2px 2px 0 #000; }
+        #brainrot-container { width: 50%; border: 2px solid #fff; height: 20px; background: rgba(0,0,0,0.5); }
+        #brainrot-bar { width: 0%; height: 100%; background: red; transition: width 0.2s; }
         
-        .setting-item:last-child {
-            border-bottom: none;
-            border-bottom-left-radius: 16px;
-            border-bottom-right-radius: 16px;
-        }
+        /* Эффекты безумия */
+        #brainrot-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; mix-blend-mode: overlay; opacity: 0; transition: opacity 0.5s, backdrop-filter 0.5s; }
+        .meme-text { position: absolute; color: lime; font-weight: bold; font-size: 24px; text-shadow: 2px 2px red, -2px -2px blue; opacity: 0; animation: flash 0.5s infinite; }
+        
+        @keyframes flash { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0; transform: scale(1.5); } 100% { opacity: 1; transform: scale(1); } }
 
-        .setting-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        /* Экраны */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; pointer-events: auto; }
+        .hidden { display: none !important; }
+        button { padding: 15px 30px; font-size: 20px; font-family: inherit; font-weight: bold; background: yellow; color: black; border: 4px solid #fff; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+        button:hover { background: red; color: white; }
+        
+        /* Джойстик для мобилок */
+        #joystick-zone { position: absolute; bottom: 20px; left: 20px; width: 100px; height: 100px; background: rgba(255,255,255,0.2); border-radius: 50%; pointer-events: auto; z-index: 15; display: none; }
+        #joystick-knob { width: 40px; height: 40px; background: rgba(255,255,255,0.8); border-radius: 50%; position: absolute; top: 30px; left: 30px; }
 
-        .setting-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
+        #yandex-ad-stub { position: absolute; bottom: 10px; width: 100%; text-align: center; color: rgba(255,255,255,0.5); font-size: 12px; pointer-events: none; z-index: 30;}
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    
-    <header class="header">
-        <button class="icon-btn" onclick="openView('settings-view')">☰</button>
-        <div class="logo">JumpJump</div>
-        <button class="icon-btn">✉</button>
-    </header>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <main id="main-view" class="view active">
+    <div id="ui-layer">
+        <div id="top-bar">
+            <div>УРОВЕНЬ БЕЗУМИЯ:</div>
+            <div id="brainrot-container"><div id="brainrot-bar"></div></div>
+            <div id="timer">00:00</div>
+        </div>
+        <div id="brainrot-overlay"></div>
+    </div>
+
+    <div id="joystick-zone"><div id="joystick-knob"></div></div>
+
+    <div id="start-screen" class="screen">
+        <h1 style="color: yellow; font-size: 40px; text-align: center; text-shadow: 4px 4px red;">БЭКРУМС:<br>СКИБИДИ ОСАДА</h1>
+        <p>Найди зеленую дверь. Избегай нормисов. Береги рассудок.</p>
+        <p>WASD + Мышь (или джойстик на мобильном)</p>
+        <button id="btn-start">ВОЙТИ В BACKROOMS</button>
+    </div>
+
+    <div id="game-over-screen" class="screen hidden">
+        <h1 style="color: red; font-size: 50px;">ТЫ СГНИЛ МОЗГОМ</h1>
+        <button id="btn-restart-dead">СМОТРЕТЬ РЕКЛАМУ И ВОСКРЕСНУТЬ</button>
+    </div>
+
+    <div id="win-screen" class="screen hidden">
+        <h1 style="color: lime; font-size: 50px; animation: flash 1s infinite;">СИГМА ВЫЖИВШИЙ</h1>
+        <button id="btn-restart-win">ЗАЛУТАТЬ РЕКЛАМУ И ЗАНОВО</button>
+    </div>
+
+    <div id="yandex-ad-stub">Реклама (ysdk) будет интегрирована при публикации</div>
+
+    <script>
+        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
+        let scene, camera, renderer;
+        let isGameRunning = false;
+        let brainrotLevel = 0; // от 0 до 100
+        let gameTime = 0;
+        let levelTimer = 0;
+        let entities = [];
+        let walls = [];
+        let audioCtx;
+        let humOscillator;
+
+        // Настройки генерации
+        const MAZE_SIZE = 10;
+        const CELL_SIZE = 10;
+        const WALL_HEIGHT = 4;
+
+        // Управление
+        const keys = { w: false, a: false, s: false, d: false };
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        let velocity = new THREE.Vector3();
+        let direction = new THREE.Vector3();
+        let euler = new THREE.Euler(0, 0, 0, 'YXZ');
+        let isPointerLocked = false;
         
-        <div class="connect-wrapper">
-            <div class="connect-btn" id="connectBtn" onclick="toggleConnection()">
-                <div class="power-icon">⏻</div>
-            </div>
-        </div>
+        // Мобильное управление
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let touchStartPos = { x: 0, y: 0 };
+        let touchMoveDir = { x: 0, y: 0 };
 
-        <div class="premium-banner glass">
-            <div class="premium-title">Подписка за рубли</div>
-            <div class="premium-desc">
-                • Без рекламы и быстрое подключение<br>
-                • Больше узлов и высокая скорость<br>
-                • Стабильное соединение без разрывов
-            </div>
-            <button class="premium-btn">Купить сейчас ✈</button>
-        </div>
-
-        <div class="server-selector glass" onclick="openView('servers-view')">
-            <div class="server-info">
-                <span class="flag">🖧</span>
-                <div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Выбрать сервер</div>
-                    <div style="font-size: 16px; font-weight: 500;" id="current-server-name">
-                        <span class="flag">🇫🇷</span> Marseille 2#
-                    </div>
-                </div>
-            </div>
-            <div style="color: var(--text-muted);">❯</div>
-        </div>
-    </main>
-
-    <main id="servers-view" class="view">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-            <button class="icon-btn" onclick="openView('main-view')" style="margin-left: -10px;">✕</button>
-            <h1 class="page-title" style="margin: 0;">Выбрать сервер</h1>
-        </div>
-
-        <div class="tabs">
-            <div class="tab active">Все</div>
-            <div class="tab">Избранное</div>
-            <div class="tab">Недавние</div>
-        </div>
-
-        <div class="server-list">
-            <div class="server-item glass" onclick="selectServer('🇫🇷 Marseille 2#')">
-                <div class="server-info">
-                    <span class="flag">🇫🇷</span><span>Франция</span>
-                </div>
-                <div class="signal">📶 12ms</div>
-            </div>
-            <div class="server-item glass" onclick="selectServer('🇩🇪 Германия')">
-                <div class="server-info">
-                    <span class="flag">🇩🇪</span><span>Германия</span>
-                </div>
-                <div class="signal">📶 18ms</div>
-            </div>
-            <div class="server-item glass" onclick="selectServer('🇳🇱 Нидерланды')">
-                <div class="server-info">
-                    <span class="flag">🇳🇱</span><span>Нидерланды</span>
-                </div>
-                <div class="signal">📶 21ms</div>
-            </div>
-            <div class="server-item glass" onclick="selectServer('🇬🇧 Великобритания')">
-                <div class="server-info">
-                    <span class="flag">🇬🇧</span><span>Великобритания</span>
-                </div>
-                <div class="signal">📶 25ms</div>
-            </div>
-            <div class="server-item glass" onclick="selectServer('🇨🇦 Канада')">
-                <div class="server-info">
-                    <span class="flag">🇨🇦</span><span>Канада</span>
-                </div>
-                <div class="signal">📶 85ms</div>
-            </div>
-        </div>
-    </main>
-
-    <main id="settings-view" class="view">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-            <button class="icon-btn" onclick="openView('main-view')" style="margin-left: -10px;">✕</button>
-            <h1 class="page-title" style="margin: 0;">Настройки</h1>
-        </div>
-
-        <div class="settings-group">
-            <div class="settings-title">Аккаунт</div>
-            <div class="settings-list">
-                <div class="setting-item glass">
-                    <div class="setting-left"><span>✉</span> Эл. почта</div>
-                    <div class="setting-right">Вход ❯</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="settings-group">
-            <div class="settings-title">Сеть</div>
-            <div class="settings-list">
-                <div class="setting-item glass">
-                    <div class="setting-left"><span>🖧</span> Режим маршрутизации</div>
-                    <div class="setting-right" style="text-align: right; line-height: 1.2;">
-                        Глобальная<br>маршрутизация ❯
-                    </div>
-                </div>
-                <div class="setting-item glass">
-                    <div class="setting-left"><span>↺</span> Восстановить по умолчанию</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="settings-group">
-            <div class="settings-title">Приложение</div>
-            <div class="settings-list">
-                <div class="setting-item glass">
-                    <div class="setting-left"><span>🌐</span> Языки</div>
-                    <div class="setting-right">русский (ru) ❯</div>
-                </div>
-                <div class="setting-item glass">
-                    <div class="setting-left"><span>💬</span> Связаться с нами</div>
-                    <div class="setting-right">❯</div>
-                </div>
-                <div class="setting-item glass">
-                    <div class="setting-left"><span>❓</span> Часто задаваемые вопросы</div>
-                    <div class="setting-right">❯</div>
-                </div>
-                <div class="setting-item glass">
-                    <div class="setting-left"><span>ℹ</span> Версия</div>
-                    <div class="setting-right">V2.7.9</div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-</div>
-
-<script>
-    // Функция переключения между разделами
-    function openView(viewId) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
-    }
-
-    // Анимация кнопки и Haptic Feedback (вибрация на телефоне)
-    function toggleConnection() {
-        const btn = document.getElementById('connectBtn');
-        btn.classList.toggle('connected');
-        
-        if (window.navigator && window.navigator.vibrate) {
-            window.navigator.vibrate(50); // Легкая вибрация
+        // --- ПРОЦЕДУРНЫЕ ТЕКСТУРЫ ---
+        function createWallpaperTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#c7b275'; // Желтый цвет бэкрумса
+            ctx.fillRect(0, 0, 256, 256);
+            ctx.fillStyle = '#a69050';
+            for(let i=0; i<1000; i++) {
+                ctx.fillRect(Math.random()*256, Math.random()*256, 2, 2); // Шум
+            }
+            // Полоски обоев
+            ctx.strokeStyle = '#b8a366';
+            ctx.lineWidth = 2;
+            for(let i=0; i<256; i+=32) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke(); }
+            return new THREE.CanvasTexture(canvas);
         }
-    }
 
-    // Имитация выбора сервера
-    function selectServer(serverName) {
-        openView('main-view');
-        // Обновляем текст на главном экране (опционально)
-        document.getElementById('current-server-name').innerHTML = serverName;
-        
-        if (window.navigator && window.navigator.vibrate) {
-            window.navigator.vibrate(20);
+        function createCarpetTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#5c5443'; // Грязный ковер
+            ctx.fillRect(0, 0, 256, 256);
+            for(let i=0; i<5000; i++) {
+                ctx.fillStyle = Math.random() > 0.5 ? '#4a4335' : '#6e6552';
+                ctx.fillRect(Math.random()*256, Math.random()*256, 1, 1);
+            }
+            return new THREE.CanvasTexture(canvas);
         }
-    }
-</script>
 
+        function createMemeFaceTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(64, 64, 60, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#000'; ctx.font = "30px Arial"; ctx.fillText("SKIBIDI", 10, 70);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // --- ИНИЦИАЛИЗАЦИЯ THREE.JS ---
+        function init3D() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+            scene.fog = new THREE.Fog(0xc7b275, 5, 30); // Желтый туман
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.y = 1.6;
+
+            renderer = new THREE.WebGLRenderer({ antialias: false });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Освещение (мерцающие лампы)
+            const ambientLight = new THREE.AmbientLight(0xfff0c2, 0.4);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8, 50);
+            pointLight.position.set(0, 3.5, 0);
+            scene.add(pointLight);
+
+            generateMaze();
+
+            window.addEventListener('resize', onWindowResize, false);
+            setupControls();
+            
+            // На мобилках показываем джойстик
+            if(isMobile) {
+                document.getElementById('joystick-zone').style.display = 'block';
+                setupMobileControls();
+            }
+        }
+
+        // --- ГЕНЕРАЦИЯ ЛАБИРИНТА ---
+        function generateMaze() {
+            const wallMat = new THREE.MeshBasicMaterial({ map: createWallpaperTexture() });
+            const floorMat = new THREE.MeshBasicMaterial({ map: createCarpetTexture() });
+            const ceilMat = new THREE.MeshBasicMaterial({ color: 0xdddddd });
+
+            // Пол и потолок
+            const floorGeo = new THREE.PlaneGeometry(MAZE_SIZE * CELL_SIZE, MAZE_SIZE * CELL_SIZE);
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.set((MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2, 0, (MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2);
+            scene.add(floor);
+
+            const ceil = new THREE.Mesh(floorGeo, ceilMat);
+            ceil.rotation.x = Math.PI / 2;
+            ceil.position.set((MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2, WALL_HEIGHT, (MAZE_SIZE*CELL_SIZE)/2 - CELL_SIZE/2);
+            scene.add(ceil);
+
+            const wallGeo = new THREE.BoxGeometry(CELL_SIZE, WALL_HEIGHT, CELL_SIZE);
+
+            // Простой алгоритм: рандомные блоки (для примера упрощено)
+            for (let x = 0; x < MAZE_SIZE; x++) {
+                for (let z = 0; z < MAZE_SIZE; z++) {
+                    if (x === 0 || z === 0 || x === MAZE_SIZE-1 || z === MAZE_SIZE-1 || Math.random() > 0.7) {
+                        // Оставляем спавн пустым
+                        if(x<2 && z<2) continue; 
+                        const wall = new THREE.Mesh(wallGeo, wallMat);
+                        wall.position.set(x * CELL_SIZE, WALL_HEIGHT/2, z * CELL_SIZE);
+                        scene.add(wall);
+                        walls.push(new THREE.Box3().setFromObject(wall));
+                    }
+                }
+            }
+
+            // Выход (Зеленая дверь)
+            const exitGeo = new THREE.BoxGeometry(2, 3, 0.5);
+            const exitMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const exit = new THREE.Mesh(exitGeo, exitMat);
+            exit.position.set((MAZE_SIZE-2)*CELL_SIZE, 1.5, (MAZE_SIZE-2)*CELL_SIZE);
+            exit.name = "exit";
+            scene.add(exit);
+            walls.push(new THREE.Box3().setFromObject(exit)); // Добавляем как коллизию для проверки
+        }
+
+        // --- УПРАВЛЕНИЕ ---
+        function setupControls() {
+            if (!isMobile) {
+                document.addEventListener('click', () => { if(isGameRunning) document.body.requestPointerLock(); });
+                document.addEventListener('pointerlockchange', () => { isPointerLocked = document.pointerLockElement === document.body; });
+                document.addEventListener('mousemove', (e) => {
+                    if (isPointerLocked && isGameRunning) {
+                        euler.setFromQuaternion(camera.quaternion);
+                        euler.y -= e.movementX * 0.002;
+                        euler.x -= e.movementY * 0.002;
+                        euler.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, euler.x));
+                        camera.quaternion.setFromEuler(euler);
+                    }
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    switch(e.code) {
+                        case 'KeyW': moveForward = true; break;
+                        case 'KeyA': moveLeft = true; break;
+                        case 'KeyS': moveBackward = true; break;
+                        case 'KeyD': moveRight = true; break;
+                    }
+                });
+                document.addEventListener('keyup', (e) => {
+                    switch(e.code) {
+                        case 'KeyW': moveForward = false; break;
+                        case 'KeyA': moveLeft = false; break;
+                        case 'KeyS': moveBackward = false; break;
+                        case 'KeyD': moveRight = false; break;
+                    }
+                });
+            }
+        }
+
+        function setupMobileControls() {
+            const zone = document.getElementById('joystick-zone');
+            const knob = document.getElementById('joystick-knob');
+            
+            zone.addEventListener('touchstart', (e) => {
+                touchStartPos.x = e.touches[0].clientX;
+                touchStartPos.y = e.touches[0].clientY;
+            });
+            
+            zone.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                let dx = e.touches[0].clientX - touchStartPos.x;
+                let dy = e.touches[0].clientY - touchStartPos.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                if(distance > 30) { dx *= 30/distance; dy *= 30/distance; }
+                knob.style.transform = `translate(${dx}px, ${dy}px)`;
+                
+                touchMoveDir.x = dx / 30; // -1 to 1
+                touchMoveDir.y = dy / 30; // -1 to 1
+                
+                moveForward = touchMoveDir.y < -0.2;
+                moveBackward = touchMoveDir.y > 0.2;
+                moveLeft = touchMoveDir.x < -0.2;
+                moveRight = touchMoveDir.x > 0.2;
+            });
+
+            zone.addEventListener('touchend', () => {
+                knob.style.transform = `translate(0px, 0px)`;
+                moveForward = moveBackward = moveLeft = moveRight = false;
+            });
+
+            // Поворот камеры свайпом по правой части экрана
+            document.addEventListener('touchmove', (e) => {
+                if(!isGameRunning) return;
+                let touch = e.touches[0];
+                if(touch.clientX > window.innerWidth / 2) {
+                     euler.setFromQuaternion(camera.quaternion);
+                     // Имитация movementX (очень упрощенно)
+                     euler.y -= (touch.clientX - (touch.clientX-1)) * 0.05; 
+                     camera.quaternion.setFromEuler(euler);
+                }
+            });
+        }
+
+        // --- ЗВУК (ПРОЦЕДУРНЫЙ) ---
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            humOscillator = audioCtx.createOscillator();
+            humOscillator.type = 'sine';
+            humOscillator.frequency.value = 50; // Гул ламп
+            
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.1;
+            
+            humOscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            humOscillator.start();
+        }
+
+        function playGlitchSound() {
+            if(!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100 + Math.random()*500, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.5);
+            osc.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        // --- ЛОГИКА ИГРЫ ---
+        function spawnEntity() {
+            const geo = new THREE.SphereGeometry(1, 16, 16);
+            const mat = new THREE.MeshBasicMaterial({ map: createMemeFaceTexture(), transparent: true, opacity: 0.8 });
+            const mesh = new THREE.Mesh(geo, mat);
+            // Спавн подальше от старта
+            mesh.position.set(Math.random()*MAZE_SIZE*CELL_SIZE, 1, Math.random()*MAZE_SIZE*CELL_SIZE);
+            scene.add(mesh);
+            entities.push(mesh);
+        }
+
+        function updateBrainrot() {
+            if(!isGameRunning) return;
+            
+            // Со временем безумие растет
+            brainrotLevel += 0.05; 
+            document.getElementById('brainrot-bar').style.width = brainrotLevel + '%';
+
+            // Эффекты
+            const overlay = document.getElementById('brainrot-overlay');
+            if (brainrotLevel > 20) {
+                overlay.style.opacity = (brainrotLevel - 20) / 100;
+                overlay.style.backdropFilter = `hue-rotate(${brainrotLevel*5}deg) blur(${brainrotLevel/20}px) contrast(${1 + brainrotLevel/50})`;
+            }
+
+            if (Math.random() < brainrotLevel / 2000) {
+                spawnMemeText();
+                playGlitchSound();
+            }
+
+            if (brainrotLevel >= 100) {
+                endGame(false);
+            }
+        }
+
+        function spawnMemeText() {
+            const words = ["SKIBIDI", "GYAT", "OHIO", "SIGMA", "РИЗЗ"];
+            const div = document.createElement('div');
+            div.className = 'meme-text';
+            div.innerText = words[Math.floor(Math.random() * words.length)];
+            div.style.left = Math.random() * 80 + 'vw';
+            div.style.top = Math.random() * 80 + 'vh';
+            document.getElementById('ui-layer').appendChild(div);
+            setTimeout(() => div.remove(), 1000);
+        }
+
+        function checkCollisions() {
+            const playerBox = new THREE.Box3().setFromCenterAndSize(camera.position, new THREE.Vector3(1, 2, 1));
+            
+            // Стены и выход
+            for(let wall of walls) {
+                if(playerBox.intersectsBox(wall)) {
+                    // Коллизия с выходом
+                    if(wall.max.y < 3) { // Костыль для определения двери
+                        endGame(true);
+                        return true;
+                    }
+                    return true; // Коллизия со стеной
+                }
+            }
+            
+            // Монстры
+            for(let ent of entities) {
+                const entBox = new THREE.Box3().setFromObject(ent);
+                if(playerBox.intersectsBox(entBox)) {
+                    brainrotLevel += 5; // Удар по рассудку
+                    playGlitchSound();
+                    ent.position.y = -100; // Прячем монстра
+                }
+            }
+            return false;
+        }
+
+        // --- ИГРОВОЙ ЦИКЛ ---
+        let prevTime = performance.now();
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isGameRunning) {
+                const time = performance.now();
+                const delta = (time - prevTime) / 1000;
+                
+                // Таймер
+                gameTime += delta;
+                document.getElementById('timer').innerText = Math.floor(gameTime) + ' сек';
+
+                // Спавн монстров каждые 15 сек
+                levelTimer += delta;
+                if(levelTimer > 15) {
+                    spawnEntity();
+                    levelTimer = 0;
+                    playGlitchSound();
+                }
+
+                // Движение
+                velocity.x -= velocity.x * 10.0 * delta;
+                velocity.z -= velocity.z * 10.0 * delta;
+
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
+                direction.normalize();
+
+                // Чем больше безумие, тем медленнее идем
+                const speedMulti = Math.max(0.2, 1 - (brainrotLevel/150));
+                const currentSpeed = 40.0 * speedMulti;
+
+                if (moveForward || moveBackward) velocity.z -= direction.z * currentSpeed * delta;
+                if (moveLeft || moveRight) velocity.x -= direction.x * currentSpeed * delta;
+
+                // Сохраняем позицию до движения
+                const oldX = camera.position.x;
+                const oldZ = camera.position.z;
+
+                camera.translateX(velocity.x * delta);
+                camera.translateZ(velocity.z * delta);
+
+                if (checkCollisions()) {
+                    camera.position.x = oldX;
+                    camera.position.z = oldZ;
+                }
+
+                updateBrainrot();
+                
+                // Анимация монстров (смотрят на игрока)
+                entities.forEach(ent => {
+                    ent.lookAt(camera.position);
+                    // Медленно ползут к игроку
+                    const dir = new THREE.Vector3().subVectors(camera.position, ent.position).normalize();
+                    ent.position.add(dir.multiplyScalar(0.02));
+                });
+                
+                prevTime = time;
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- УПРАВЛЕНИЕ СОСТОЯНИЕМ ИГРЫ ---
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            if(!audioCtx) initAudio();
+            if(!scene) {
+                init3D();
+                animate();
+            }
+            // Сброс параметров
+            camera.position.set(CELL_SIZE/2, 1.6, CELL_SIZE/2);
+            brainrotLevel = 0;
+            gameTime = 0;
+            levelTimer = 0;
+            entities.forEach(e => scene.remove(e));
+            entities = [];
+            isGameRunning = true;
+            prevTime = performance.now();
+            if(!isMobile) document.body.requestPointerLock();
+        }
+
+        function endGame(isWin) {
+            isGameRunning = false;
+            if(!isMobile) document.exitPointerLock();
+            
+            if(isWin) {
+                document.getElementById('win-screen').classList.remove('hidden');
+            } else {
+                document.getElementById('game-over-screen').classList.remove('hidden');
+            }
+        }
+
+        // --- ИНТЕГРАЦИЯ ЯНДЕКС SDK (Заглушка) ---
+        function showYandexAdAndRestart(screenId) {
+            // В РЕАЛЬНОМ ПРОЕКТЕ ЗДЕСЬ ВЫЗОВ SDK:
+            // ysdk.adv.showRewardedVideo({ callbacks: { onRewarded: () => { ... } } });
+            
+            alert("Имитация: Реклама просмотрена! Баланс пополнен (шутка). Перезапуск...");
+            document.getElementById(screenId).classList.add('hidden');
+            startGame();
+        }
+
+        // Привязка кнопок
+        document.getElementById('btn-start').addEventListener('click', startGame);
+        document.getElementById('btn-restart-dead').addEventListener('click', () => showYandexAdAndRestart('game-over-screen'));
+        document.getElementById('btn-restart-win').addEventListener('click', () => showYandexAdAndRestart('win-screen'));
+
+    </script>
 </body>
 </html>
